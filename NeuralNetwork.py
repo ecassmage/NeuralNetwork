@@ -6,9 +6,7 @@ import data_management
 from logs import log
 
 mk_log = True
-
-if mk_log:
-    logger = log.Log('log_test.txt')
+logger = None
 
 
 class NeuralNetwork:
@@ -336,9 +334,13 @@ def run_checks(neural_network, input_data, answers, output_size=None):
 
 
 def main():
-    global mk_log
+    global mk_log, logger
+
     data = collect_config()
     mk_log = data['mk_log']
+
+    if mk_log:
+        logger = log.Log('log_test.txt')
 
     X, y = data_management.get_data(data['input file'], data['output file'], data['map file'])
     training_groups_inp, training_groups_out, rest_inp, rest_out = data_management.split_into_groups(data['training sets'], data['training set size'], X, y)
