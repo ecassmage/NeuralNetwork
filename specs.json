@@ -8,10 +8,10 @@
   "#COMMENT scalar": "makes it go crazy if changed",
   "scalar": 0.1,
   "inputs": 22,
-  "hidden layers": [64],
+  "hidden layers": [2],
   "outputs": 2,
 
   "training sets": 100,
   "training set size": 32,
-  "runs per set": 10
+  "runs per set": 100
 }

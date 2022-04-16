@@ -111,8 +111,8 @@ class NeuralNetwork:
         # neural_pos_better_cost = neural_cost - new_network_pos.calculate_sum_loss()
         # neural_neg_better_cost = neural_cost - new_network_neg.calculate_sum_loss()
 
-        if max(arr) < 0:
-            print("Whoa!!!", arr)
+        # if max(arr) < 0:
+            # print("Whoa!!!", arr)
             # self.scalar /= 1.5
 
         index = arr.index(max(arr))
@@ -353,7 +353,7 @@ def main():
     if mk_log:
         logger.write("No more training sets\nOnto testing accuracy")
 
-    run_checks(n, rest_inp, rest_out)
+    # run_checks(n, rest_inp, rest_out)
 
     n.change_inputs_outputs(rest_inp, [])
     n.run_network()
