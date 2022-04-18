@@ -15,6 +15,9 @@
   "inputs": 22,
 <<<<<<< Updated upstream
   "hidden layers": [20],
+=======
+  "hidden layers": [100],
+>>>>>>> Stashed changes
   "outputs": 2,
 
   "training sets": 100,
