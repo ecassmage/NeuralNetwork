@@ -1,17 +1,26 @@
 {
-  "mk_log": false,
+  "mk_log": true,
   "debug": false,
+  "save network": true,
 
   "input file": "data/input_set.txt",
   "output file": "data/output_set.txt",
   "map file": "data/map.txt",
+  "save to": "save_network",
+  "#COMMENT load file": "set null for none, else set path from location of NeuralNetwork.py",
+  "load file": "save_network/neural_save_1.txt",
+
   "#COMMENT scalar": "makes it go crazy if changed",
   "scalar": 0.1,
   "inputs": 22,
-  "hidden layers": [2],
+  "hidden layers": [20],
   "outputs": 2,
 
   "training sets": 100,
   "training set size": 32,
-  "runs per set": 100
+  "runs per set": 100,
+
+  "neural networks run": 2,
+
+  "accuracy rounding": 4
 }

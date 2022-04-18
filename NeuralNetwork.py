@@ -2,6 +2,9 @@ import numpy as np
 import sys
 import copy
 
+import save_network.save
+from save_network import save
+
 import data_management
 from logs import log
 
@@ -10,18 +13,33 @@ logger = None
 
 
 class NeuralNetwork:
-    def __init__(self, data_inputs, hidden_layer, data_outputs, scalar=3):
-        self.output_basic = data_outputs
-        self.outputs, self.classes = self.create_matrix(data_outputs, hidden_layer[-1])
-        self.inputs = self.check_for_matrix(data_inputs)
-        self.hidden_layer = hidden_layer
+    def __init__(self, data_inputs=None, hidden_layer=None, data_outputs=None, scalar=1):
+        if data_inputs is None or hidden_layer is None or data_outputs is None:
+            self.outputs, self.classes = None, None
+            self.inputs = None
+            self.layers = None
 
-        self.layers = [Layer(hidden_layer[num], layer, Activation()) for num, layer in enumerate(hidden_layer[1:])]
-        # self.loss = None
+        else:
+            self.outputs, self.classes = self.create_matrix(data_outputs, hidden_layer[-1])
+            self.inputs = self.check_for_matrix(data_inputs)
+            self.layers = [
+                Layer(n_inputs=hidden_layer[num], n_neurons=layer, activation=Activation())
+                for num, layer in enumerate(hidden_layer[1:])
+            ]
+
+        self.output_basic = data_outputs
+        self.hidden_layer = hidden_layer
         self.current_layer = 0
         self.scalar = scalar
-
         self.error = 0
+
+    def load(self, weights, biases, classes):
+        self.classes = classes
+        self.layers = [
+            Layer(weights=weight, biases=bias, activation=Activation())
+            for weight, bias in zip(weights, biases)
+        ]
+        self.hidden_layer = [len(weights[0])] + [len(val[0]) for val in biases]
 
     def predict_input(self, input_data_set):
         self.inputs = self.check_for_matrix(input_data_set)
@@ -233,11 +251,24 @@ class NeuralNetwork:
 
 
 class Layer:
-    def __init__(self, n_inputs, n_neurons, activation):
-        self.weights = 0.2 * np.random.randn(n_inputs, n_neurons)
-        self.biases = np.zeros((1, n_neurons))  # might need () around 1, n_neurons
-        self.activation = activation
+
+    def __init__(self, **kwargs):
+        if 'weights' in kwargs:
+            self.weights = np.array(kwargs['weights'])
+            self.biases = np.array(kwargs['biases'])
+        else:
+            self.weights = 0.2 * np.random.randn(kwargs['n_inputs'], kwargs['n_neurons'])
+            self.biases = np.zeros((1, kwargs['n_neurons']))
+
+        self.activation = kwargs['activation']
         self.output = None
+        pass
+
+    # def __init__(self, n_inputs, n_neurons, activation):
+    #     self.weights = 0.2 * np.random.randn(n_inputs, n_neurons)
+    #     self.biases = np.zeros((1, n_neurons))  # might need () around 1, n_neurons
+    #     self.activation = activation
+    #     self.output = None
 
     def forward(self, inputs):
         self.output = np.dot(inputs, self.weights) + self.biases
@@ -333,6 +364,10 @@ def run_checks(neural_network, input_data, answers, output_size=None):
     return right, wrong
 
 
+def get_percent(right, wrong):
+    return 100 * right / (right + wrong)
+
+
 def main():
     global mk_log, logger
 
@@ -341,35 +376,52 @@ def main():
 
     if mk_log:
         logger = log.Log('log_test.txt')
-
     X, y = data_management.get_data(data['input file'], data['output file'], data['map file'])
     training_groups_inp, training_groups_out, rest_inp, rest_out = data_management.split_into_groups(data['training sets'], data['training set size'], X, y)
+    accuracy = []
 
-    n = NeuralNetwork(X, data['hidden layers'], y, scalar=data['scalar'])
-    for num in range(len(training_groups_inp)):
-        n.change_inputs_outputs(training_groups_inp[num], training_groups_out[num])
-        n.train_network(data['runs per set'], debug=data['debug'])
+    for net in range(data['neural networks run']):
+        n = save_network.save.load_network(data['load file'], NeuralNetwork()) if data['load file'] is not None \
+            else NeuralNetwork(X, data['hidden layers'], y, scalar=data['scalar'])
+
+        for num in range(len(training_groups_inp)):
+            n.change_inputs_outputs(training_groups_inp[num], training_groups_out[num])
+            n.train_network(data['runs per set'], debug=data['debug'])
+            if mk_log:
+                logger.write("Next Training Set", end='\n\n\n\n\n\n\n\n\n\n\n\n')
         if mk_log:
-            logger.write("Next Training Set")
+            logger.write("No more training sets\nOnto testing accuracy")
 
-    if mk_log:
-        logger.write("No more training sets\nOnto testing accuracy")
+        # run_checks(n, rest_inp, rest_out)
 
-    # run_checks(n, rest_inp, rest_out)
+        n.change_inputs_outputs(rest_inp, [])
+        n.run_network()
+        right, wrong = check_accuracy(n.get_predictions(), rest_out)
+        accuracy.append([right, wrong, get_percent(right, wrong)])
+        # networks.append(n)
+        if data['save network']:
+            save.save_network(f"save_network/neural_save_{net}.txt", n)
 
-    n.change_inputs_outputs(rest_inp, [])
-    n.run_network()
-    right, wrong = check_accuracy(n.get_predictions(), rest_out)
+    for neural_round in accuracy:
+        string = f"Right: {neural_round[0]}, Wrong: {neural_round[1]}\n" \
+                 f"Neural Accuracy: {round(neural_round[2], data['accuracy rounding'])}%\n"
+        print(string)
+        if mk_log:
+            logger.write(string)
+    summed = np.sum(accuracy, axis=0, dtype=int)
+    string = f"Right: {summed[0]}, Wrong: {summed[1]}\n" \
+             f"Neural Accuracy: {round(summed[2] / len(accuracy), data['accuracy rounding'])}%\n"
+    print(string)
 
     if mk_log:
         np.set_printoptions(threshold=sys.maxsize)
         logger.write(f"Predictions          -> {('[' + ' '.join([str(val) for val in list(n.get_predictions().tolist())]) + ']')}")
         logger.write(f"Correct Predictions  -> {('[' + ' '.join([str(val) for val in rest_out]) + ']')}")
-        logger.write(f"right: {right}, wrong: {wrong}")
+        logger.write(string)
         logger.close()
 
-    print(f"The training was {round((right / (right + wrong)) * 100, 2)}% successful")
-    print(f"right: {right}, wrong: {wrong}")
+    # print(f"The training was {round((right / (right + wrong)) * 100, 2)}% successful")
+    # print(f"right: {right}, wrong: {wrong}")
 
     pass
 
