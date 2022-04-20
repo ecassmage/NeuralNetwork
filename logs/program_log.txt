@@ -1,0 +1,14 @@
+Right >> 2822, Wrong >> 182
+Neural Accuracy >> 93.9414
+Right >> 2844, Wrong >> 160
+Neural Accuracy >> 94.6738
+Right >> 2876, Wrong >> 128
+Neural Accuracy >> 95.739
+Right >> 2847, Wrong >> 157
+Neural Accuracy >> 94.7736
+Right >> 2742, Wrong >> 262
+Neural Accuracy >> 91.2783
+Right >> 2765, Wrong >> 239
+Neural Accuracy >> 92.0439
+Right >> 2816, Wrong >> 188
+Neural Accuracy >> 93.7417

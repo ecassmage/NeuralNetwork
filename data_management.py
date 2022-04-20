@@ -5,13 +5,14 @@ def to_int(arr):
     return [int(val) for val in arr]
 
 
-def get_data(file_path_input, file_path_output, map_file):
+def get_data(file_path_input, file_path_output, map_file, randomize=False):
     X = [to_int(line.strip().split(',')) for line in open(file_path_input)]
     y = [int(line.strip()) for line in open(file_path_output)]
-    temp = list(zip(X, y))
-    random.shuffle(temp)
-    X, y = map(list, zip(*temp))
-    X, y = condense_data(X, y, map_file)
+    if randomize:
+        temp = list(zip(X, y))
+        random.shuffle(temp)
+        X, y = map(list, zip(*temp))
+        X, y = condense_data(X, y, map_file)
     return list(X), list(y)
 
 

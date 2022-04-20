@@ -1,0 +1,46 @@
+{
+  "main": {
+    "log": true,
+    "file location": "logs",
+    "file name": "program_log.txt",
+
+    "neural_networks_run": 8,
+    "accuracy_rounding": 4
+  },
+
+  "log": false,
+  "debug": true,
+  "save_network": false,
+  "load_network": false,
+
+
+  "input_file": "data/input_set.txt",
+  "output_file": "data/output_set.txt",
+  "map_file": "data/map.txt",
+  "log_file": "logs/log_{n}.txt",
+  "randomize_data": true,
+
+
+  "save_directory": "save_network",
+
+
+  "load_file": "save_network/neural_save_{n}.txt",
+  "scalar": 0.1,
+
+  "inputs": 22,
+  "h_layers": [10],
+  "h_layers_range": [-0.5, 0.5],
+  "classes": 2,
+
+  "activation": "sigmoid",
+  "softmax output": false,
+
+
+  "training_sets": 80,
+  "training_set_size": 64,
+  "runs_per_set": 70,
+
+
+  "presets": [
+  ]
+}
